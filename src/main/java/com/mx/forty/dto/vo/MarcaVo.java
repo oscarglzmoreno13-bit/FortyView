@@ -2,13 +2,21 @@ package com.mx.forty.dto.vo;
 
 public class MarcaVo {
 
-	private String idMarca;
+	private Integer idMarca;
 	private String clave;
 	private String nombre;
-	public String getIdMarca() {
+	private String nombreEstatus;
+	
+	public String getNombreEstatus() {
+		return nombreEstatus;
+	}
+	public void setNombreEstatus(String nombreEstatus) {
+		this.nombreEstatus = nombreEstatus;
+	}
+	public Integer getIdMarca() {
 		return idMarca;
 	}
-	public void setIdMarca(String idMarca) {
+	public void setIdMarca(Integer idMarca) {
 		this.idMarca = idMarca;
 	}
 	public String getClave() {

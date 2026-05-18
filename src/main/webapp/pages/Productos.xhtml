@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	 xmlns:f="http://java.sun.com/jsf/core"	
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+      
+      <style>
+    .ui-filter-column .ui-column-customfilter .custom-filter {
+        width: 100%;
+        box-sizing: border-box;
+    }
+</style>
+      
+      
+<h:head>
+    <title>Gestion de Productos</title>
+</h:head>
+<h:body>
+ 
+ <h:form id="form">    
+         
+         <!-- actionListener="#{crudView.openNew}" -->
+         <!--  value="#{crudView.deleteButtonMessage}" -->
+         <!-- disabled="#{!crudView.hasSelectedProducts()}" -->
+         <!-- actionListener="#{crudView.deleteSelectedProducts}" -->
+
+        <p:toolbar>
+            
+         </p:toolbar>    
+           <p:dataTable id="dt-Marcas" widgetVar="dtMarcas" var="producto" value="#{productosController.listaProductos}"
+            reflow="true" styleClass="products-table" 
+            rowKey="#{producto.idProducto}" paginator="true" rows="10" selectionRowMode="add" paginatorPosition="bottom">
+            <f:facet name="header">
+                <div class="products-table-header">
+                    <span style="font-weight: bold">Productos</span>
+                    
+                </div>
+                <div class="products-table-header"></div>
+                <div class="products-table-header">
+                	<p:toolbarGroup>
+                <p:commandButton value="Nuevo" icon="pi pi-plus" 
+                    update=":dialogs:manage-product-content" oncomplete="PF('manageProductDialog').show()"
+                    styleClass="ui-button-success" style="margin-right: .5rem">
+                    <p:resetInput target=":dialogs:manage-product-content" />
+                </p:commandButton>
+               
+            </p:toolbarGroup>
+                 </div>
+            </f:facet>
+            <p:column headerText="#"  style="text-align:center"  >
+                <h:outputText value="#{producto.idProducto}" />
+            </p:column>
+            <p:column headerText="Marca" style="text-align:center" sortBy="#{producto.nombreMarca}" filterBy="#{producto.nombreMarca}">
+                <h:outputText value="#{producto.nombreMarca}" />
+            </p:column>    
+            <p:column headerText="Nombre" style="text-align:center" sortBy="#{producto.nombre}" filterBy="#{producto.nombre}">
+                <h:outputText value="#{producto.nombre}" />
+            </p:column>
+            <p:column headerText="SKU" style="text-align:center" sortBy="#{producto.sku}" filterBy="#{producto.sku}">
+                <h:outputText value="#{producto.sku}" />
+            </p:column>
+            <p:column headerText="UPC" style="text-align:center" sortBy="#{producto.upc}" filterBy="#{producto.upc}">
+                <h:outputText value="#{producto.upc}" />
+            </p:column>
+            <!-- 
+            <p:column headerText="Image" exportable="false">
+                <p:graphicImage value="#{producto.urlImagen}" library="demo" styleClass="product-image" />
+            </p:column> -->
+             <p:column exportable="false" style="text-align:center" ariaHeaderText="Actions" headerText="Acciones">
+                <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-product-content :form:dt-Marcas"
+                    oncomplete="PF('manageProductDialog').show()"
+                    styleClass="edit-button rounded-button ui-button-success" process="@this">
+                    
+                    <f:setPropertyActionListener value="#{producto}"
+                                                 target="#{productosController.productoSelected}"/>
+                </p:commandButton>
+                  <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                 process="@this" styleClass="ui-button-danger" 
+                                 oncomplete="PF('deleteProductDialog').show()">
+                    <f:setPropertyActionListener value="#{producto}" target="#{productosController.productoSelected}" />
+                </p:commandButton>
+            </p:column>
+
+        </p:dataTable> 
+            
+        
+          
+    </h:form>
+    
+    <p:dialog header="Header" widgetVar="dlg2" minHeight="40" width="350" showEffect="fade" modal="true" closeOnEscape="true">
+	    <p class="m-0">Nueva Marca</p>
+	</p:dialog>
+	
+	
+	
+	 <h:form id="dialogs">
+        <p:dialog header="Datos del Producto" showEffect="fade" modal="true" widgetVar="manageProductDialog"
+            responsive="true">
+            <p:outputPanel id="manage-product-content" class="ui-fluid">
+                <p:outputPanel >
+                	<div class="field">
+                        <p:outputLabel for="nombre">Marca</p:outputLabel>
+                        <h:selectOneMenu value="#{productosController.productoSelected.idMArca}">
+					        <f:selectItems value="#{productosController.listaMarcas}" var="marca"
+					                       itemValue="#{marca.idMarca}" itemLabel="#{marca.nombre}"/>
+					    </h:selectOneMenu>
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="nombre">Nombre</p:outputLabel>
+                        <p:inputText id="nombre" value="#{productosController.productoSelected.nombre}" required="true" />
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="descripcion">Descripción</p:outputLabel>
+                        <p:inputText id="descripcion" value="#{productosController.productoSelected.descripcion}" required="true" />
+                    </div>
+                    
+			        <div class="field"></div>
+			        
+			        <div class="field">
+                        <p:outputLabel for="upc">Upc</p:outputLabel>
+                        
+                        <p:inputText id="upc" value="#{productosController.productoSelected.upc}"/>
+                    </div>            
+                    <div class="field">
+                        <p:outputLabel for="sku">Sku</p:outputLabel>
+                        <p:inputText id="sku" value="#{productosController.productoSelected.sku}" required="true" />
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="clave">Clave</p:outputLabel>
+                        <p:inputText id="clave" value="#{productosController.productoSelected.clave}" required="true" />
+                    </div>
+                    <div class="field col-12 md:col-4">
+		                <p:outputLabel for="input1" value="Costo del Producto"/>
+		                <p:inputNumber id="input1" value="#{productosController.productoSelected.monto}" modifyValueOnWheel="false" />
+		            </div>
+		            <div class="field col-12 md:col-4">
+		                <p:outputLabel for="input2" value="Precio de Venta"/>
+		                <p:inputNumber id="input2" value="#{productosController.productoSelected.precioVenta}" modifyValueOnWheel="false" />
+		            </div>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <f:facet name="footer">
+                <p:commandButton value="Save" icon="pi pi-check"  actionListener="#{productosController.saveProducto()}" 
+                    update="manage-product-content" process="manage-product-content @this" />
+                <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageProductDialog').hide()"
+                    class="ui-button-secondary" type="button"  />
+            </f:facet>
+        </p:dialog>
+        
+        <p:confirmDialog widgetVar="deleteProductDialog" showEffect="fade" width="300"
+            message="Al eliminar el producto se inactivaran las Configuraciones en donde este producto se encuentre. Estas seguro de eliminar el Producto?" header="Confirm" severity="warn">
+            <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{productosController.deleteProducto()}" 
+                process="@this" update="@this" 
+                oncomplete="PF('deleteProductDialog').hide()" />
+                
+            <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                onclick="PF('deleteProductDialog').hide()" />
+        </p:confirmDialog>
+
+        <p:confirmDialog global="true" showEffect="fade" width="300">
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                icon="pi pi-times" />
+        </p:confirmDialog>
+    </h:form>
+</h:body>
+</html>
