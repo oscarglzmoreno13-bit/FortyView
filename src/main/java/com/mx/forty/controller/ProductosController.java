@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -21,6 +20,8 @@ import org.primefaces.PrimeFaces;
 import com.mx.forty.dto.vo.MarcaVo;
 import com.mx.forty.dto.vo.ProductoVo;
 import com.mx.forty.util.ConstantesView;
+
+import jakarta.annotation.PostConstruct;
 
 
 @Named("productosController")

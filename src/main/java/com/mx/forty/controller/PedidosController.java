@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
@@ -34,6 +33,8 @@ import com.mx.forty.dto.vo.ProductoVoConfigutarion;
 import com.mx.forty.dto.vo.TipoFormaPagoViewVo;
 import com.mx.forty.util.ConstantesView;
 import com.mx.forty.util.UtileriasUi;
+
+import jakarta.annotation.PostConstruct;
 
 @Named("pedidosController")
 @ViewScoped

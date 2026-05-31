@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -15,6 +14,8 @@ import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
+
+import jakarta.annotation.PostConstruct;
 
 @Named("calendarView")
 @ViewScoped

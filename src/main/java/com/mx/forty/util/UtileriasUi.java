@@ -42,7 +42,7 @@ public class UtileriasUi implements Serializable {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy, HH:mm");
 		campania.setDescripcion((String) map.get("descripcion"));
 		campania.setIdCampania(map.get("idCampania")==null?null:((BigDecimal) map.get("idCampania")).intValue());
-		campania.setIdEstatus(map.get("idEstatus")==null?Constantes.ESTATUS_GRAL_ACTIVO:((BigDecimal) map.get("idEstatus")).intValue());
+		campania.setIdEstatus(map.get("idEstatus")==null?ConstantesView.ESTATUS_GRAL_ACTIVO:((BigDecimal) map.get("idEstatus")).intValue());
 		campania.setFechaFinString((String) map.get("fechaFin"));
 		campania.setFechaInicioString((String) map.get("fechaInicio"));
 		try {

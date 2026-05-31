@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -33,6 +32,8 @@ import com.mx.forty.dto.vo.ProductoVoConfigutarion;
 import com.mx.forty.dto.vo.TipoConfiguracionVo;
 import com.mx.forty.util.ConstantesView;
 import com.mx.forty.util.UtileriasUi;
+
+import jakarta.annotation.PostConstruct;
 
 @Named("configuracionesController")
 @ViewScoped
