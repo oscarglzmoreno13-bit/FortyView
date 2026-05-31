@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	 xmlns:f="http://java.sun.com/jsf/core"	
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+      
+      <h:outputScript name="locales/locale-de.js" library="primefaces" />
+<h:outputScript name="locales/locale-es.js" library="primefaces" />
+      
+      <style>
+    .ui-filter-column .ui-column-customfilter .custom-filter {
+        width: 100%;
+        box-sizing: border-box;
+    }
+</style>
+      
+      
+<h:head>
+    <title>Captura de Pedidos</title>
+</h:head>
+<style>
+    .label {
+        width: 20%;
+        padding: 4px;
+    }
+
+    .value {
+        width: 80%;
+        padding: 4px;
+    }
+
+    .grid {
+        width: 100%;
+    }
+
+    .error {
+        color: red;
+    }
+
+    .outputLabel {
+        font-weight: bold;
+    }
+
+    .grid {
+        width: 33%;
+        padding: 4px;
+    }
+    .colFecha {
+    text-align: center;   /* centra contenido en la celda */
+}
+.colUsuario {
+    text-align: left;     /* alinea contenido a la izquierda */
+}
+</style>
+<h:body>
+    <h:form id="frmPedidos">
+    
+    	<div class="card">
+    	<h5></h5>
+    		
+    		<p:fieldset legend="Captura de Pedidos" 
+            	style="position:fixed; top:0; right:0; width:auto; z-index:1000; text-align:right;">
+    			<h:panelGrid columns="3" style="width:100%" columnClasses="colFecha,colUsuario">
+			        <h:outputText value="Fecha: " />
+			       <h:outputText value="Usuario"/>
+			       <p:commandButton type="button" icon="pi pi-save" styleClass="mr-2" 
+			       	update="frmPedidos">
+			       	
+			       		 <p:ajax event="click" listener="#{pedidosController.savePedido()}" update=":frmPedidos"/>
+			       	</p:commandButton>
+			       
+			       <h:outputText value="#{pedidosController.hoy}">
+			            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+			        </h:outputText>
+					<p:selectOneMenu 
+				                 value="#{pedidosController.ejecutivoSelected.idPersona}"
+				                 editable="false" required="true">
+				        <f:selectItems value="#{pedidosController.listaEjecutivos}" 
+					                   var="ejecutivo"
+					                   itemValue="#{ejecutivo.idPersona}" 
+					                   itemLabel="#{ejecutivo.userName} - #{ejecutivo.nombre}"/>
+					</p:selectOneMenu>
+					
+			    </h:panelGrid>
+			</p:fieldset>
+				
+        			
+				
+	        <p:accordionPanel multiple="true" widgetVar="multiple" scrollIntoView="center">
+	            <p:tab title="Datos del Cliente">
+                    <p:messages/>
+                    <h:panelGrid columns="2" columnClasses="label, value"
+             			style="width:50%; margin:0 auto;">
+                        <h:outputText value="Nombre (s) *"/>
+                    	 <p:inputText value="#{pedidosController.personaPedido.nombre}" label="Firstname"/>
+
+						<p:commandButton icon="pi pi-search" 
+								 oncomplete="PF('personatDialog').show()" >
+				            <p:ajax event="click" listener="#{pedidosController.buscaPersonas()}" update=":frmPedidos:personaDetail"/>
+				            <f:setPropertyActionListener value="#{pedidosController.personaSelected}" 
+				            		target="#{pedidosController.personaPedido}" />
+				        </p:commandButton>
+
+
+                     </h:panelGrid>	 
+                     <h:panelGrid columns="2" columnClasses="label, value">
+                    	 <h:outputText value="Apellido Paterno " />
+                  		 <p:inputText value="#{pedidosController.personaPedido.apellidoPaterno}"  label="ApeP"/>
+                  		 
+           				 <h:outputText value="Apellido Materno"/>
+                  		 <p:inputText value="#{pedidosController.personaPedido.apellidoMaterno}"  label="ApeM"/>
+                    	 
+                        
+                        <h:outputText value="Teléfono "/>
+                    	<p:inputMask id="phone" value="#{pedidosController.personaPedido.telefono}" mask="(99) 9999-9999" validateMask="true" />
+	            				
+            				<h:outputText value="correo electrónico"/>
+                   			<p:inputText id="email" 
+							             value="#{pedidosController.personaPedido.correo}" 
+							             type="email" 
+							              
+							             requiredMessage="El correo es obligatorio"
+							             placeholder="usuario@dominio.com">
+							    <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+							    <p:message for="email" />
+							</p:inputText>
+
+                    </h:panelGrid>
+	            </p:tab>
+	             <p:tab title="Datos del Domicilio">
+                    <p:messages/>
+                  <h:panelGrid columns="4" columnClasses="label, value"
+             			style="width:40%; margin:0 auto;">
+                    	<h:outputText value="Estado"/>
+                    	<p:selectOneMenu 
+					                 value="#{pedidosController.estadoSelected.idEstado}"
+					                 editable="false" required="true">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaEstados}" 
+						                   var="estado"
+						                   itemValue="#{estado.idEstado}" 
+						                   itemLabel="#{estado.nombre}"/>
+						   <p:ajax event="change" 
+				                listener="#{pedidosController.buscaMunicipios()}" 
+				                update="municipiosCbo cpCbo coloniasCbo" />              
+						</p:selectOneMenu>
+                  		
+                  		 
+                  		 <h:outputText value="Municipio"/>
+                  		 <p:selectOneMenu 
+					                 value="#{pedidosController.mcpioSelected.idMunicipio}"
+					                 editable="false" required="true" id="municipiosCbo">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaMunicipios}" 
+						                   var="mcpio"
+						                   itemValue="#{mcpio.idMunicipio}" 
+						                   itemLabel="#{mcpio.nombre}"/>
+						     <p:ajax event="change" 
+				                listener="#{pedidosController.buscaColoniasCp()}" 
+				                update="cpCbo coloniasCbo" />       
+						</p:selectOneMenu>
+                  		 
+                  		 <h:outputText value="CP"/>
+                  		 <p:selectOneMenu 
+					                 value="#{pedidosController.cpSeleccionado}"
+					                 editable="true" required="true" id="cpCbo">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaCp}" 
+						                   var="cp"
+						                   itemValue="#{cp.cp}" 
+						                   itemLabel="#{cp.cp}"/>
+						     <p:ajax event="change" 
+				                listener="#{pedidosController.buscaColoniasByCp()}" 
+				                update="coloniasCbo" />       
+						</p:selectOneMenu>
+                  		 
+                  		 <h:outputText value="Colonia"/>
+                  		  <p:selectOneMenu 
+					                 value="#{pedidosController.coloniaSelected.idColonia}"
+					                 editable="false" required="true" id="coloniasCbo">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaColonias}" 
+						                   var="colonia"
+						                   itemValue="#{colonia.idColonia}" 
+						                   itemLabel="#{colonia.nombre}"/>
+						</p:selectOneMenu>
+						
+						 <h:outputText value="Calle"/>
+						 <p:inputText value="#{pedidosController.direccionPedido.calle}"  label="Calle1"/>
+						 
+						  <h:outputText value="Entre Calles"/>
+						 <p:inputText value="#{pedidosController.direccionPedido.entreCalles}"  label="entreCalles"/>
+						 
+						  <h:outputText value="# Exterior"/>
+						 <p:inputText value="#{pedidosController.direccionPedido.numeroExterior}"  label="#ext"/>
+						 
+						  <h:outputText value="# Interior"/>
+						 <p:inputText value="#{pedidosController.direccionPedido.numeroInterior}"  label="#int"/>
+                     </h:panelGrid>
+                     <h:panelGrid columns="2" columnClasses="label, value"
+					             style="width:50%; margin:0 auto;">
+					    <h:outputText value="Referencias"/>
+					    <p:inputTextarea rows="6" style="width:100%;" value="#{pedidosController.direccionPedido.referencias}"/>
+					</h:panelGrid>
+
+	            </p:tab>
+	             <p:tab title="Datos del Pedido" id="pnDataPedido">
+                    <p:messages/>
+                    <h:panelGrid columns="2" columnClasses="label, value">
+                    	<h:outputText value="Campaña"/>
+                  		 <p:selectOneMenu 
+					                 value="#{pedidosController.campaniaSelected.idCampania}"
+					                 editable="false" required="true" id="cpCmapania">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaCampanias}" 
+						                   var="campania"
+						                   itemValue="#{campania.idCampania}" 
+						                   itemLabel="#{campania.nombre}"/>
+						    <p:ajax event="change" 
+				                listener="#{pedidosController.buscaConfiguracionesByCampania()}" 
+				               update="pnlGrid radioDT" />        
+						</p:selectOneMenu>
+						<h:outputText value="#{pedidosController.totalPedido}"/>
+					</h:panelGrid>
+					<h:panelGrid columns="1" columnClasses="label, value" id="pnlGrid">
+						 <p:splitter style="height: 300px" styleClass="mb-5" widgetVar="splitter">
+					        <p:splitterPanel styleClass="flex align-items-center justify-content-center">
+					           
+						         <p:dataTable id="radioDT" var="configuracion" value="#{pedidosController.listaConfiguraciones}"
+						         selection="#{pedidosController.configuracionSelected}" >             
+						                     
+						            <f:facet name="header">
+						                <div class="products-table-header">
+						                    <span style="font-weight: bold">Configuracioes de Venta</span>
+						                </div>
+						            </f:facet>
+						            <p:column>
+								          <p:selectBooleanCheckbox value="#{configuracion.selected}">
+											    <p:ajax event="change"
+											            listener="#{pedidosController.viewDetailConfiguration(configuracion)}"
+											            update=":frmPedidos:productDetail radioDT"
+											            oncomplete="PF('productDialog').show()" />
+											</p:selectBooleanCheckbox>
+											
+
+						            </p:column>
+						            <p:column headerText="Nombre" sortBy="#{configuracion.nombre}">
+						                <h:outputText value="#{configuracion.nombre}" />
+						            </p:column>
+						            <p:column headerText="$ Venta" sortBy="#{configuracion.previoVenta}">
+					                <h:outputText value="#{configuracion.previoVenta}" style="font-weight: 700">
+					                    <f:convertNumber currencySymbol="$" type="currency" />
+					                </h:outputText>
+					            </p:column>
+									<f:facet name="footer">
+							            <span class="font-bold">Total del pedido
+							            	<h:outputText value="#{pedidosController.totalPedido}" id="totalPed" />
+							            </span>
+							        </f:facet>
+					        </p:dataTable>	
+					        <h:panelGrid columns="2" columnClasses="label, value"
+							             style="width:50%; margin:0 auto;">
+							    <h:outputText value="Observaciones Adicionales"/>
+							    <p:inputTextarea rows="6" style="width:100%;" value="#{pedidosController.direccionPedido.referencias}"/>
+							</h:panelGrid>	           
+					        </p:splitterPanel>
+					    </p:splitter>
+					</h:panelGrid>	
+                    
+	            </p:tab>
+	            <p:tab title="Datos del Pago">
+                    <p:messages/>
+                     <h:panelGrid columns="4" columnClasses="label, value"
+             			style="width:50%; margin:0 auto;">
+                    	 <h:outputText value="Forma de PAgo"/>
+                    	  <p:selectOneMenu 
+					                 value="#{pedidosController.tipoFormaPagoSelected.idTipoFormaPago}"
+					                 editable="false" required="true" id="cboTipoForPa">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaTipoFormaPago}" 
+						                   var="tipo"
+						                   itemValue="#{tipo.idTipoFormaPago}" 
+						                   itemLabel="#{tipo.nombre}"/>
+						     <p:ajax event="change" 
+				                listener="#{pedidosController.buscaFormaPago()}" 
+				                update="cboFormaPago" />       
+						</p:selectOneMenu>
+						
+						<h:outputText value="Detalle del Pago"/>
+                    	  <p:selectOneMenu 
+					                 value="#{pedidosController.formaPagoSelected.idFormaPago}"
+					                 editable="false" required="true" id="cboFormaPago">
+					    <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+						    <f:selectItems value="#{pedidosController.listaMostrarFormasPago}" 
+						                   var="forma"
+						                   itemValue="#{forma.idFormaPago}}" 
+						                   itemLabel="#{forma.nombre}"/>
+						</p:selectOneMenu>
+                    </h:panelGrid>
+                     <h:panelGrid columns="2" columnClasses="label, value"
+					             style="width:50%; margin:0 auto;">
+					    <h:outputText value="Link de Pago"/>
+					    <p:inputTextarea rows="6" style="width:100%;" />
+					</h:panelGrid>
+                </p:tab>    
+	        </p:accordionPanel>    
+        </div>    
+		
+		
+		<p:dialog header="Productos en la Comfiguracion" widgetVar="productDialog" modal="true" showEffect="fade"
+              hideEffect="fade" resizable="false" width="30%">
+        <p:outputPanel id="productDetail" style="text-align:center;">
+            <p:column rendered="#{not empty pedidosController.configuracionSelected}">
+                <div class="product">
+                    <div class="product-grid-item card" style="margin-bottom: 0">
+                        <div class="product-grid-item-top">
+                            <div>
+                                <i class="pi pi-tag product-category-icon"/>
+                            </div>
+                           <!-- <span class="product-badge status-#{dtSelectionView.selectedProduct.inventoryStatus.name().toLowerCase()}">#{dtSelectionView.selectedProduct.inventoryStatus.text}</span>
+                           -->
+                        </div>
+                        <div class="product-grid-item-content">
+                            <p:dataTable id="radioDT" var="producto" value="#{pedidosController.listaDetalle}"
+						                      rowKey="#{producto.idProducto}" cellNavigation="true">
+						            <f:facet name="header">
+						                <div class="products-table-header">
+						                    <span style="font-weight: bold">Productos</span>
+						                </div>
+						            </f:facet>
+						            <p:column headerText="Nombre" sortBy="#{producto.nombre}">
+						                <h:outputText value="#{producto.nombre}" />
+						            </p:column>
+						             <p:column headerText="Cantidad" sortBy="#{producto.cantidad}">
+						                <h:outputText value="#{producto.cantidad}" />
+						            </p:column>
+						    </p:dataTable>        
+                        </div>
+                        <div class="product-grid-item-bottom">
+                           
+                           
+                        </div>
+                    </div>
+                </div>
+            </p:column>
+        </p:outputPanel>
+    </p:dialog>
+
+	 <p:dialog header="Busqueda Personas" widgetVar="personatDialog" modal="true" showEffect="fade"
+              hideEffect="fade" resizable="false">
+        <p:outputPanel id="personaDetail" style="text-align:center;">
+            <p:column >
+                <div class="product">
+                    <div class="product-grid-item card" style="margin-bottom: 0">
+                        <div class="product-grid-item-content">
+                        </div>
+                    </div>
+                </div>
+            </p:column>
+        </p:outputPanel>
+    </p:dialog>
+	
+    </h:form>
+
+</h:body>
+</html>
+

@@ -22,6 +22,28 @@ private Integer idProducto;
 	private Integer idEstatus;
 	private String nombreEstatus;
 	private boolean upcExistente;
+	
+	////datos para configuraciones de venta
+	private Integer id;
+	private Integer cantidad;
+	
+	public Integer getCantidad() {
+		return cantidad;
+	}
+
+	public void setCantidad(Integer cantidad) {
+		this.cantidad = cantidad;
+	}
+
+	public Integer getId() {
+		return getIdProducto();
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+		this.idProducto = id;
+	}
+
 	public boolean isUpcExistente() {
 		return upcExistente;
 	}

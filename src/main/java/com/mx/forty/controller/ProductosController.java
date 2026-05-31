@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -19,6 +20,7 @@ import org.primefaces.PrimeFaces;
 
 import com.mx.forty.dto.vo.MarcaVo;
 import com.mx.forty.dto.vo.ProductoVo;
+import com.mx.forty.util.ConstantesView;
 
 
 @Named("productosController")
@@ -56,6 +58,7 @@ public class ProductosController implements Serializable {
 		this.listaMarcas = listaMarcas;
 	}
 
+	@PostConstruct
 	public void init() {
 		listaProductos = new ArrayList<ProductoVo>();
 		getProductos();
@@ -64,20 +67,20 @@ public class ProductosController implements Serializable {
 	
 	public void getProductos() {
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080/demo/api/productos");
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/productos");
 		listaProductos = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<ProductoVo>>() {});
 	}
 	
 	private void getMarcas() {
 		// TODO Auto-generated method stub
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080/demo/api/marcas");
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/marcas");
 		listaMarcas = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<MarcaVo>>() {});
 	}
 	
 	private void getAllUpc() {
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080/demo/api/productos/getUpc");
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/productos/getUpc");
 		listaUpc = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<String>>() {});
 	}
 	
@@ -90,7 +93,7 @@ public class ProductosController implements Serializable {
 	
 	public void saveProducto () {
 		 Client client = ClientBuilder.newClient();
-         WebTarget target = client.target("http://localhost:8080/demo/api/productos");
+         WebTarget target = client.target(ConstantesView.hostPROD+"/api/productos");
 
          try {
         	 target.request(MediaType.APPLICATION_JSON)
@@ -107,7 +110,7 @@ public class ProductosController implements Serializable {
 	
 	public void deleteProducto () {
 		 Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://localhost:8080/demo/api/productos/delete");
+        WebTarget target = client.target(ConstantesView.hostPROD+"/api/productos/delete");
 
         try {
        	 target.request(MediaType.APPLICATION_JSON)

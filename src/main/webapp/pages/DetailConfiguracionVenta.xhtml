@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+
+<h:head>
+    <title>Products</title>
+    <style>
+html {
+    font-size: 14px;
+}
+    </style>
+</h:head>
+
+<h:body>
+    <h:form>
+		<p:dataTable id="checkboxDT" var="product" value="#{configuracionesController.listaSelectedTemp}"
+                     selection="#{configuracionesController.listaProductos}" rowKey="#{product.idProducto}"
+                     style="margin-bottom:0" paginator="true" rows="5" selectionPageOnly="false" selectionRowMode="none" cellNavigation="true">
+            <p:column selectionBox="true" style="width:16px;text-align:center"/>
+            <p:column headerText="Code">
+                <h:outputText value="#{product.clave}" />
+            </p:column>
+
+            <p:column headerText="Name">
+                <h:outputText value="#{product.nombre}" />
+            </p:column>
+
+            <p:column headerText="Quantity">
+                <p:inputText />
+            </p:column>
+        </p:dataTable>
+    </h:form>
+</h:body>
+
+</html>

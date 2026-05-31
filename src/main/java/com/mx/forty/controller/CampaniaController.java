@@ -1,6 +1,7 @@
 package com.mx.forty.controller;
 
 import java.io.Serializable;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +25,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 
 import com.mx.forty.dto.vo.CampaniaVoUi;
+import com.mx.forty.util.ConstantesView;
 import com.mx.forty.util.UtileriasUi;
 
 @Named("campaniaController")
@@ -80,7 +82,8 @@ public class CampaniaController implements Serializable {
 	public void getCampanias() {
 		Client client = ClientBuilder.newClient();
 		listaCampanias = new ArrayList<CampaniaVoUi>();
-		WebTarget target = client.target("http://localhost:8080/demo/api/campanias");
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/campanias");
+		
 		List<Map<String, Object>> lst = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Map<String, Object>>>() {});
 		for (Map<String, Object> map : lst) {
 			listaCampanias.add(UtileriasUi.convertJsonToCampania(map));
@@ -99,7 +102,7 @@ public class CampaniaController implements Serializable {
 				 
 				 campaniaSelected.setFechaInicio(new Date(fechaInicioSelected.getTime()));
 				 Client client = ClientBuilder.newClient();
-		         WebTarget target = client.target("http://localhost:8080/demo/api/campanias/save");
+		         WebTarget target = client.target(ConstantesView.hostPROD+"/api/campanias/save");
 
 		         try { 
 		        	 Map<String, Object> voJson = UtileriasUi.convertCampaniaVoToJson(getCampaniaSelected());
@@ -138,7 +141,7 @@ public class CampaniaController implements Serializable {
 
 	public void deleteCampania() {
 		Client client = ClientBuilder.newClient();
-	    WebTarget target = client.target("http://localhost:8080/demo/api/campanias/delete");
+	    WebTarget target = client.target(ConstantesView.hostPROD+"/api/campanias/delete");
 
 	    Map<String, Object> voJson = UtileriasUi.convertCampaniaVoToJson(getCampaniaSelected());
 	    Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.json(voJson));

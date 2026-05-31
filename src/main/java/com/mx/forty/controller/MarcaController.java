@@ -22,6 +22,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.util.LangUtils;
 
 import com.mx.forty.dto.vo.MarcaVo;
+import com.mx.forty.util.ConstantesView;
 import com.mx.forty.util.CustomerStatus;
 
 
@@ -99,14 +100,14 @@ public class MarcaController implements Serializable {
 	private void getMarcas() {
 		// TODO Auto-generated method stub
 		Client client = ClientBuilder.newClient();
-		WebTarget target = client.target("http://localhost:8080/demo/api/marcas");
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/marcas");
 		listaMarcas = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<MarcaVo>>() {});
    
 	}
 	
 	public void saveMOrUpdate() {
 		 Client client = ClientBuilder.newClient();
-         WebTarget target = client.target("http://localhost:8080/demo/api/marcas");
+         WebTarget target = client.target(ConstantesView.hostPROD+"/api/marcas");
 
          try {
         	 getMarca().setClave(getMarca().getClave().trim().toUpperCase());
@@ -126,7 +127,7 @@ public class MarcaController implements Serializable {
 	
 	public void deleteMarca() {
 		Client client = ClientBuilder.newClient();
-	    WebTarget target = client.target("http://localhost:8080/demo/api/marcas/delete");
+	    WebTarget target = client.target(ConstantesView.hostPROD+"/api/marcas/delete");
 
 	    Response response = target.request(MediaType.APPLICATION_JSON)
 	                              .post(Entity.entity(marca, MediaType.APPLICATION_JSON));
