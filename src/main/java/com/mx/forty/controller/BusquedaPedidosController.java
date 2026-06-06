@@ -1,8 +1,7 @@
 package com.mx.forty.controller;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -11,19 +10,22 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
@@ -34,7 +36,7 @@ import com.mx.forty.util.ConstantesView;
 import jakarta.annotation.PostConstruct;
 
 @Named("consultaPedidos")
-@ViewScoped
+@RequestScoped
 public class BusquedaPedidosController implements Serializable {
 
 	/**
@@ -100,7 +102,7 @@ public class BusquedaPedidosController implements Serializable {
 		
 	}
 	
-	public void procesaPagos() {
+	public void procesaPagos(BufferedReader reader) {
 		List<PedidoViewVo> lista = new ArrayList<PedidoViewVo>();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -113,7 +115,9 @@ public class BusquedaPedidosController implements Serializable {
 		    String[] valores = null;
 		    Calendar otra = Calendar.getInstance();
 		    Calendar hoy = Calendar.getInstance();
-		 try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+//		    hoy.set(Calendar.DAY_OF_MONTH, 5);
+		    List<Map<String, Object>> listaMap = new ArrayList<Map<String,Object>>();
+		 try {
 		        String linea;
 		        while ((linea = reader.readLine()) != null) {
 		        	if(numFila > 0 ) {
@@ -124,6 +128,8 @@ public class BusquedaPedidosController implements Serializable {
 			  				 vo.setEstatus(getString(valores[ConstantesView.columna_status]));
 			  				 vo.setTelefono((getString(valores[ConstantesView.columna_telefono])));;
 			  				 vo.setMonto(getDouble(getString(valores[ConstantesView.columna_amount])));
+			  				 vo.setNombre((getString(valores[ConstantesView.columna_nombre])));
+			  				 vo.setLastName((getString(valores[ConstantesView.columna_lastName])));
 			  				 for (int i = 0; i < valores.length; i++) {
 								String string = valores[i];
 								if(string.matches("^OR\\d+$")) {
@@ -144,7 +150,10 @@ public class BusquedaPedidosController implements Serializable {
 			                         hoy.get(Calendar.MONTH) == otra.get(Calendar.MONTH) &&
 			                         hoy.get(Calendar.DAY_OF_MONTH) == otra.get(Calendar.DAY_OF_MONTH);
 							if(esHoy) {
-								lista.add(vo);
+								if(vo.getEstatus().equals(ConstantesView.estatus_pagado_ecarPay)) {
+									lista.add(vo);
+									listaMap.add(getMapEnvio(vo));
+								}
 							}
 			  			 }
 			  		 } else {
@@ -156,22 +165,55 @@ public class BusquedaPedidosController implements Serializable {
 		    }
 		 
 		 if(!lista.isEmpty()) {
-			 System.out.println();
+			 Client client = ClientBuilder.newClient();
+		        String url = ConstantesView.hostPROD+"/api/pedidos/generaOrdenEnvio";
+		        
+		        // Aquí mandas tu Map o DTO como JSON (ejemplo simplificado)
+		        WebTarget target = client.target(url);
+		        Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.json(listaMap));
+		        response.readEntity(new GenericType<Map<String, Object>>() {});
+		        response.close();
+		        client.close();
 		 }
 	}
 	
+	 private Map<String, Object> getMapEnvio(PedidoViewVo vo) {
+		// TODO Auto-generated method stub
+		 Map<String, Object> map = new HashMap<String, Object>();
+		 map.put("lastName",vo.getLastName() );
+		 map.put("monto", vo.getMonto() );
+		 map.put("nombre", vo.getNombre() );
+		 map.put("telefono", vo.getTelefono() );
+		 map.put("orderNum", vo.getPedidoEcartpay());
+		return map;
+	}
+
 	 public void handleFileUpload(FileUploadEvent event) {
-	        UploadedFile file = event.getFile();
-	        FacesMessage message = new FacesMessage("Exito", file.getFileName() + " subido.");
-	        FacesContext.getCurrentInstance().addMessage(null, message);
+//	        UploadedFile file = event.getFile();
+//	        FacesMessage message = new FacesMessage("Exito", file.getFileName() + " subido.");
+//	        FacesContext.getCurrentInstance().addMessage(null, message);
+//	        
+//	        // Procesar el archivo (guardar en disco, base de datos, etc.)
+//	        try {
+//	            InputStream input = file.getInputStream();
+//	            // ... logica para guardar ...
+//	        } catch (IOException e) {
+//	            // ... manejar error ...
+//	        }
+		 String field=event.getComponent().getId();
 	        
-	        // Procesar el archivo (guardar en disco, base de datos, etc.)
-	        try {
-	            InputStream input = file.getInputStream();
-	            // ... logica para guardar ...
-	        } catch (IOException e) {
-	            // ... manejar error ...
-	        }
+	    	try {   		
+	            /* Guardamos el fichero */
+	    		Map<String, Object> reg = new HashMap<String, Object>();
+	    		reg.put(field, event.getFile().getFileName() );
+	            reg.put(field+"_content", event.getFile().getContent());
+	            byte[] data = event.getFile().getContent();
+	            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
+	            procesaPagos(reader);
+	    	} catch (Exception ex) { 
+	    		ex.printStackTrace();
+	    		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,"", ex.getLocalizedMessage()));    		
+	    		}
 	    }
 	
 	private Double getDouble (Object valor) {
@@ -195,4 +237,11 @@ public class BusquedaPedidosController implements Serializable {
 			return new String(valor.toString());
 		}
 	}
+	
+	 public void upload() {
+	        if (file != null) {
+	            FacesMessage message = new FacesMessage("Successful", file.getFileName() + " is uploaded.");
+	            FacesContext.getCurrentInstance().addMessage(null, message);
+	        }
+	    }
 }

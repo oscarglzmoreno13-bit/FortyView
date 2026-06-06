@@ -12,7 +12,14 @@ public class PedidoViewVo {
 	private String estatus;
 	private String pedidoEcartpay;
 	private Date fechaCreated;
+	private String lastName;
 	
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 	public Date getFechaCreated() {
 		return fechaCreated;
 	}
