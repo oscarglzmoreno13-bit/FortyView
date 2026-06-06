@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	 xmlns:f="http://java.sun.com/jsf/core"	
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+      
+      <h:outputScript name="locales/locale-de.js" library="primefaces" />
+<h:outputScript name="locales/locale-es.js" library="primefaces" />
+      
+      <style>
+    .ui-filter-column .ui-column-customfilter .custom-filter {
+        width: 100%;
+        box-sizing: border-box;
+    }
+</style>
+      
+      
+<h:head>
+    <title>Consulta de Pedidos</title>
+</h:head>
+<h:body>
+ 
+ <h:form id="form">    
+         
+         <p:growl id="msgs" showDetail="true"
+					skipDetailIfEqualsSummary="true" />
+         
+         <!-- actionListener="#{crudView.openNew}" -->
+         <!--  value="#{crudView.deleteButtonMessage}" -->
+         <!-- disabled="#{!crudView.hasSelectedProducts()}" -->
+         <!-- actionListener="#{crudView.deleteSelectedProducts}" -->
+
+        <p:toolbar>
+            
+         </p:toolbar>    
+           <p:dataTable id="dt-Marcas" widgetVar="dtMarcas" var="pedido" value="#{consultaPedidos.listaPedidos}"
+            reflow="true" styleClass="products-table" 
+            rowKey="#{pedido.idPedido}" paginator="true" rows="10" selectionRowMode="add" paginatorPosition="bottom">
+            <f:facet name="header">
+                <div class="products-table-header">
+                    <span style="font-weight: bold">Pedidos</span>
+                    
+                </div>
+                <div class="products-table-header"></div>
+                <div class="products-table-header">
+                	<p:toolbarGroup>
+               
+            </p:toolbarGroup>
+                 </div>
+            </f:facet>
+<!-- 
+ -->		<p:column headerText="# Pedido" style="text-align:center" sortBy="#{pedido.idPedido}" >
+                <h:outputText value="#{pedido.idPedido}" />
+            </p:column>
+
+            <p:column headerText="Nombre del Cliente" style="text-align:center" sortBy="#{pedido.nombre}" >
+                <h:outputText value="#{pedido.nombre}" />
+            </p:column>
+            <p:column headerText="Teléfono" style="text-align:center" sortBy="#{pedido.telefono}" >
+                <h:outputText value="#{pedido.telefono}" />
+            </p:column>
+            <p:column headerText="Monto" style="text-align:center" sortBy="#{pedido.monto}" >
+                <h:outputText value="#{pedido.monto}" />
+            </p:column>
+            <p:column headerText="Fecha" style="text-align:center" sortBy="#{pedido.fecha}" >
+                <h:outputText value="#{pedido.fecha}" />
+            </p:column>
+            <p:column headerText="Estatus" style="text-align:center" sortBy="#{pedido.estatus}" >
+                <h:outputText value="#{pedido.estatus}" />
+            </p:column>
+
+        </p:dataTable> 
+        
+        
+          
+    </h:form>
+    
+    <p:dialog header="Header" widgetVar="dlg2" minHeight="40" width="350" showEffect="fade" modal="true" closeOnEscape="true">
+	    <p class="m-0">Nueva Marca</p>
+	</p:dialog>
+	
+	
+	
+	 <h:form id="dialogs">
+	 <p:growl id="msgs" showDetail="true"
+					skipDetailIfEqualsSummary="true" />
+        <p:dialog header="Datos de la Campaña" showEffect="fade" modal="true" widgetVar="manageProductDialog"
+            responsive="true">
+            <p:outputPanel id="manage-product-content" class="ui-fluid">
+                <p:outputPanel >
+                    <div class="field">
+                        <p:outputLabel for="nombre">Nombre</p:outputLabel>
+                        <p:inputText id="nombre" value="#{campaniaController.campaniaSelected.nombre}" required="true" />
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="descripcion">Decripción</p:outputLabel>
+                        <p:inputTextarea id="descripcion" value="#{campaniaController.campaniaSelected.descripcion}" required="true" rows="6" cols="33"/>
+                    </div>
+                    <div class="field">
+                    	<TABLE>
+                    		<tr>
+                    			<td>
+                    				<p:outputLabel for="fechaInicio">Fecha de Inicio</p:outputLabel>
+                    			</td>
+                    			<td> </td>
+                    			<td>
+                    				<p:outputLabel for="fechaFin">Fecha de Fin</p:outputLabel>
+                    			</td>
+                    		</tr>
+                    		<tr>
+                    			<td>
+                    				<p:datePicker id="fechaInicio" value="#{campaniaController.fechaInicioSelected}">
+										<p:ajax event="dateSelect"	listener="#{campaniaController.onDateSelect}" update="msgs" />
+									</p:datePicker>
+                    			</td>
+                    			<td> </td>
+                    			<td>
+                    				<p:datePicker id="fechaFin" value="#{campaniaController.fechaFinSelected}">
+										<p:ajax event="dateSelect"	listener="#{campaniaController.onDateSelect}" update="msgs" />
+									</p:datePicker>
+                    			</td>
+                    		</tr>
+                    	</TABLE>
+                    </div>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <f:facet name="footer">
+                <p:commandButton value="Save" icon="pi pi-check"  actionListener="#{campaniaController.saveCampania()}" 
+                    update="manage-product-content" process="manage-product-content @this" />
+                <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageProductDialog').hide()"
+                    class="ui-button-secondary" type="button"  />
+            </f:facet>
+        </p:dialog>
+        
+        <p:confirmDialog widgetVar="deleteProductDialog" showEffect="fade" width="300"
+            message="Al eliminar esta campaña, se inactivaran las configuraciones relacionadas, Estas seguro de eliminar la campaña?" header="Confirm" severity="warn">
+            <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{campaniaController.deleteCampania()}" 
+                process="@this" update="@this" 
+                oncomplete="PF('deleteProductDialog').hide()" />
+                
+            <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                onclick="PF('deleteProductDialog').hide()" />
+        </p:confirmDialog>
+
+        <p:confirmDialog global="true" showEffect="fade" width="300">
+            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary"
+                icon="pi pi-times" />
+        </p:confirmDialog>
+    </h:form>
+</h:body>
+</html>

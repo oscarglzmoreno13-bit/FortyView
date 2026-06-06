@@ -83,8 +83,10 @@ public class CampaniaController implements Serializable {
 		Client client = ClientBuilder.newClient();
 		listaCampanias = new ArrayList<CampaniaVoUi>();
 		WebTarget target = client.target(ConstantesView.hostPROD+"/api/campanias");
+		System.out.println(ConstantesView.hostPROD+"/api/campanias");
 		
 		List<Map<String, Object>> lst = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Map<String, Object>>>() {});
+		System.out.println("Tamaño de la lista de compañas"+lst.size());
 		for (Map<String, Object> map : lst) {
 			listaCampanias.add(UtileriasUi.convertJsonToCampania(map));
 		}
@@ -132,6 +134,10 @@ public class CampaniaController implements Serializable {
 //	}
 
 	public List<CampaniaVoUi> getListaCampanias() {
+		if(listaCampanias==null) {
+			getCampanias();
+			campaniaSelected = new CampaniaVoUi();
+		}
 		return listaCampanias;
 	}
 

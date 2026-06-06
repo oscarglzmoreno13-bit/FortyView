@@ -1,21 +1,33 @@
 package com.mx.forty.controller;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.primefaces.PrimeFaces;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mx.forty.dto.vo.CampaniaVoUi;
 import com.mx.forty.dto.vo.ColoniaUiVo;
 import com.mx.forty.dto.vo.ConfiguracionVentaVoView;
@@ -55,7 +67,67 @@ public class CapturaPedidosController implements Serializable {
 	private List<FormaPagoViewVo> listaFormasPago;
 	private List<FormaPagoViewVo> listaFormasPagoMostrar;
 	private FormaPagoViewVo formaPagoSelected;
+	private Date hoy = new Date();
+	private List<PersonaViewVo> listaEjecutivos;
+	 private PersonaViewVo ejecutivoSelected;
+	 private String nombreBusqueda;
+	 private List<PersonaViewVo> listaBusqueda;
+	 private PersonaViewVo personaBusquedaSelected;
 	
+	public String getNombreBusqueda() {
+		return nombreBusqueda;
+	}
+
+	 public void setNombreBusqueda(String nombreBusqueda) {
+		 this.nombreBusqueda = nombreBusqueda;
+	 }
+
+	 public List<PersonaViewVo> getListaBusqueda() {
+		 return listaBusqueda;
+	 }
+
+	 public void setListaBusqueda(List<PersonaViewVo> listaBusqueda) {
+		 this.listaBusqueda = listaBusqueda;
+	 }
+
+	 public PersonaViewVo getPersonaBusquedaSelected() {
+		 return personaBusquedaSelected;
+	 }
+
+	 public void setPersonaBusquedaSelected(PersonaViewVo personaBusquedaSelected) {
+		 this.personaBusquedaSelected = personaBusquedaSelected;
+	 }
+
+	public List<PersonaViewVo> getListaEjecutivos() {
+		if(listaEjecutivos == null) {
+			init();
+		}
+		return listaEjecutivos;
+	}
+
+	 public void setListaEjecutivos(List<PersonaViewVo> listaEjecutivos) {
+		 this.listaEjecutivos = listaEjecutivos;
+	 }
+
+	 public PersonaViewVo getEjecutivoSelected() {
+		 if(ejecutivoSelected == null) {
+			 ejecutivoSelected = new PersonaViewVo();
+		 }
+		 return ejecutivoSelected;
+	 }
+
+	 public void setEjecutivoSelected(PersonaViewVo ejecutivoSelected) {
+		 this.ejecutivoSelected = ejecutivoSelected;
+	 }
+
+	public Date getHoy() {
+		return hoy;
+	}
+
+	public void setHoy(Date hoy) {
+		this.hoy = hoy;
+	}
+
 	public List<TipoFormaPagoViewVo> getListaTiposFormaPago() {
 		return listaTiposFormaPago;
 	}
@@ -65,7 +137,7 @@ public class CapturaPedidosController implements Serializable {
 	}
 
 	public TipoFormaPagoViewVo getTipoFormaPagoSelected() {
-		if(tipoFormaPagoSelected==null) {
+			if(tipoFormaPagoSelected==null) {
 			tipoFormaPagoSelected = new TipoFormaPagoViewVo();
 		}
 		return tipoFormaPagoSelected;
@@ -213,6 +285,15 @@ public class CapturaPedidosController implements Serializable {
 		montoTotal = Double.valueOf(0);
 		buscaTiposFormaPago();
 		tipoFormaPagoSelected = new TipoFormaPagoViewVo();
+		buscaEjecutivos();
+		ejecutivoSelected = new PersonaViewVo();
+	}
+	
+	public void buscaEjecutivos() {
+		// TODO Auto-generated method stub
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(ConstantesView.hostPROD+"/api/pedidos/buscaEjecutivos");
+		listaEjecutivos = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<PersonaViewVo>>() {});
 	}
 	
 	public void validaSeleccionColonia() {
@@ -237,6 +318,46 @@ public class CapturaPedidosController implements Serializable {
 		}
 		return direccionPedido;
 	}
+	
+	public void validaDatosIngresados() {
+		System.out.println(direccionPedido.getCalle());
+	}
+	
+	public void resetDatosBusquedaName() {
+		nombreBusqueda = "";
+		listaBusqueda = new ArrayList<PersonaViewVo>();
+		personaBusquedaSelected = new PersonaViewVo();
+	}
+	
+	public void buscaPersonas() {
+//		 if(personaPedido!=null) {
+			 Client client = ClientBuilder.newClient();
+			 WebTarget target = client.target(ConstantesView.hostPROD+"/api/pedidos/findPersonaLikeNombre")
+			                          .queryParam("nombre",nombreBusqueda==null
+			                          							?""
+			                          							:nombreBusqueda); // ejemplo idEstado=5
+
+			 listaBusqueda = target.request(MediaType.APPLICATION_JSON)
+			                         .get(new GenericType<List<PersonaViewVo>>() {});
+			 personaBusquedaSelected = new PersonaViewVo();
+//		 }
+		  
+	 }
+	
+	public void asignaPersonaSelected() {
+		if(personaBusquedaSelected !=null) {
+			if(personaPedido==null) {
+				personaPedido = new PersonaViewVo();
+			}
+			personaPedido.setApellidoMaterno(personaBusquedaSelected.getApeMat());
+			personaPedido.setApellidoPaterno(personaBusquedaSelected.getApePat());
+			personaPedido.setIdPersona(personaBusquedaSelected.getIdPersona());
+			personaPedido.setTelefono(personaBusquedaSelected.getTelefono());
+			personaPedido.setNombre(personaBusquedaSelected.getNombre());
+			personaPedido.setCorreo(personaBusquedaSelected.getMail());
+		}
+	}
+	
 	
 	public void viewDetailConfiguration(ConfiguracionVentaVoView configuracion) {
 		configuraionSelected = null;
@@ -362,63 +483,136 @@ public class CapturaPedidosController implements Serializable {
 		
 	 
 	public void save() {
-		if(validaDatos()) {
+		String error = validaDatos();
+		if(error == null) {
 			Map<String, Object> json = new HashMap<String, Object>();
-			json.put("", UtileriasUi.convertVoToJsonPersonaPedido(personaPedido));
-			json.put("", UtileriasUi.convertVoToJsonDireccionPedido(direccionPedido));
+			json.put("personaPedido", UtileriasUi.convertVoToJsonPersonaPedido(personaPedido));
+			json.put("direccionPedido", UtileriasUi.convertVoToJsonDireccionPedido(direccionPedido));
 			List<Map<String, Object>> listaCongi = new ArrayList<Map<String,Object>>();
 			for (ConfiguracionVentaVoView configuracionVentaVoView : listaConfiguracionesSeleccionadas) {
 				listaCongi.add(UtileriasUi.converVoToJsonPedidoDetalle(configuracionVentaVoView));
 			}
-			json.put("", listaCongi);
-			json.put("", UtileriasUi.convertVoToJsonPedidoFormaPago(formaPagoSelected, montoTotal));
+			json.put("listaCoonfiguraciones", listaCongi);
+			json.put("formaPago", UtileriasUi.convertVoToJsonPedidoFormaPago(formaPagoSelected, montoTotal));
+			json.put("ejecutivo", ejecutivoSelected.getIdPersona());
+			
+			Client client = ClientBuilder.newClient();
+	        String url = ConstantesView.hostPROD+"/api/pedidos/savePedido";
+
+	        // Aquí mandas tu Map o DTO como JSON (ejemplo simplificado)
+	        WebTarget target = client.target(url);
+	        Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.json(json));
+	        Map<String, Object> rsp = response.readEntity(new GenericType<Map<String, Object>>() {});
+	        response.close();
+	        client.close();
+	        if (rsp.get("status").equals("success")) {
+	            	            
+				try {
+					
+					Integer idPedido = ((BigDecimal) rsp.get("idPedido")).intValue();
+					System.out.println("Pedido guardado con id: " + idPedido);
+					 FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+							                             "Pedido guardado ("+idPedido+")",
+							                             "Número de pedido: " + idPedido);
+					 FacesContext.getCurrentInstance().addMessage("dialogs:msgs", msg);
+					 limpiaValores();
+					 init();
+				} catch (Exception  e) {
+					// TODO Auto-generated catch block
+					FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,
+                            "Pedido No guardado",null);
+					FacesContext.getCurrentInstance().addMessage(null, msg);
+				} 
+				 PrimeFaces.current().ajax().update("dialogs:messages", "dialogs");
+				 PrimeFaces.current().ajax().update("dialogs:msgs", "dialogs");
+	        }
+
 			System.out.println();
+		} else {
+			FacesMessage msg = new FacesMessage("Error", error);
+			FacesContext.getCurrentInstance().addMessage("dialogs:msgs", msg);
+			 PrimeFaces.current().ajax().update("dialogs:messages", "dialogs");
+			 PrimeFaces.current().ajax().update("dialogs:msgs", "dialogs");
 		}
 	}
 
-	private boolean validaDatos() {
+	private void limpiaValores() {
+		// TODO Auto-generated method stub
+		listaCampanias = null;
+		listaColonias = null;
+		listaConfiguraciones = null;
+		listaConfiguracionesSeleccionadas = null;
+		listaCp = null;
+		listaDetalle = null;
+		listaEjecutivos = null;
+		listaFormasPago = null;
+		listaFormasPagoMostrar = null;
+		listaTiposFormaPago = null;
+		personaPedido = null;
+		cpSeleccionado = null;
+		coloniaSeleccioada = null;
+		campaniaSelected = null;
+		listaConfiguraciones = null;
+		montoTotal = Double.valueOf(0);
+		tipoFormaPagoSelected = null;
+		ejecutivoSelected = null;
+	}
+
+	private String validaDatos() {
+		String error = null;
 		if(personaPedido==null) {
-			return false;
+			error = "No se han ingresado los datos del cliente";
+			return error;
 		} else {
-			if(personaPedido.getNombre()==null && 
+			if(personaPedido.getNombre()==null ||
 					(personaPedido.getNombre()!=null && personaPedido.getNombre().equals(""))) {
-				return false;
+				error = "Ingrese el nombre del cliente";
+				return error;
 			}
-			if(personaPedido.getTelefono()==null && 
+			if(personaPedido.getTelefono()==null ||
 					(personaPedido.getTelefono()!=null && personaPedido.getTelefono().equals(""))) {
-				return false;
+				error = "Ingrese el teléfono del cliente";
+				return error;
 			}
 		}
 		if(direccionPedido==null) {
-			return false;
+			error  = "Capture la dirección del cliente";
+			return error;
 		} else {
 			if(direccionPedido.getIdColonia()==null || 
 					(direccionPedido.getIdColonia()!=null && direccionPedido.getIdColonia().equals(0))) {
-				return false;
+				error = "Seleccione la colonia de entrega";
+				return error;
 			}
 			if(direccionPedido.getCalle()==null || 
 					(direccionPedido.getCalle()!=null && direccionPedido.getCalle().equals(""))) {
-				return false;
+				
+				error = "Ingrese la calle de entrega del pedido";
+				return error;
 			}
 			if(direccionPedido.getNumeroExterior()==null || 
 					(direccionPedido.getNumeroExterior()!=null && direccionPedido.getNumeroExterior().equals(""))) {
-				return false;
+				error = "Falta el número exterior";
+				return error;
 			}
 		}
 		if(listaConfiguracionesSeleccionadas==null ||
 				(listaConfiguracionesSeleccionadas!=null && listaConfiguracionesSeleccionadas.isEmpty())) {
-			return false;
+			error = "No se ha seleccionado alguna Configuración de venta";
+			return error;
 		}
 		if(formaPagoSelected==null) {
-			return false;
+			error = "No se ha seleccionado alguna forma de pagp";
+			return error;
 		} else {
 			if(formaPagoSelected.getIdFormaPago()==null || 
 					(formaPagoSelected.getIdFormaPago()!=null && formaPagoSelected.getIdFormaPago().equals(0))) {
-				return false;
+				error = "No se ha seleccionado alguna forma de pagp";
+				return error;
 			}
 				
 		}
-		return true;
+		return null;
 	}
 
 }

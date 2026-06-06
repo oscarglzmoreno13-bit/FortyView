@@ -175,6 +175,9 @@ public class ConfiguracionVentaController implements Serializable {
 	}
 
 	public List<ConfiguracionVentaVoView> getListaConfiguraciones() {
+		if(listaConfiguraciones == null) {
+			init();
+		}
 		return listaConfiguraciones;
 	}
 
@@ -438,7 +441,7 @@ public class ConfiguracionVentaController implements Serializable {
 		if(!fechaFinSelected.after(fechaInicioSelected)) {
 			return false;
 		}
-		if(!fechaInicioSelected.after(now) || !fechaFinSelected.after(now)) {
+		if(!fechaInicioSelected.after(now) && !fechaFinSelected.after(now)) {
 			return false;
 		}
 		return true;

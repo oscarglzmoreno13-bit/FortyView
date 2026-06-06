@@ -125,7 +125,7 @@ public class UtileriasUi implements Serializable {
 	
 	public static Map<String, Object> convertVoToJsonPersonaPedido(PersonaViewVo vo) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("id¨Persona", vo.getIdPersona());
+		map.put("idPersona", vo.getIdPersona());
 		map.put("nombre", vo.getNombre());
 		map.put("apePat", vo.getApellidoPaterno());
 		map.put("apeMat", vo.getApellidoMaterno());

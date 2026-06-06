@@ -7,8 +7,30 @@ public class PersonaViewVo {
 	private String apellidoPaterno;
 	private String apellidoMaterno;
 	private String correo;
-	private String telefono;
 	private String userName;
+	private String apePat;
+	private String apeMat;
+	private String telefono;
+	private String mail;
+	
+	public String getApePat() {
+		return apePat;
+	}
+	public void setApePat(String apePat) {
+		this.apePat = apePat;
+	}
+	public String getApeMat() {
+		return apeMat;
+	}
+	public void setApeMat(String apeMat) {
+		this.apeMat = apeMat;
+	}
+	public String getMail() {
+		return mail;
+	}
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
 	public String getUserName() {
 		return userName;
 	}

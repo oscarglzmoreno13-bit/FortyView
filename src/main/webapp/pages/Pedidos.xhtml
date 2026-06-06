@@ -16,7 +16,7 @@
       
       
 <h:head>
-    <title>Gestion de Campañas</title>
+    <title>Captura de Pedidos</title>
 </h:head>
 <h:body>
  
@@ -24,41 +24,91 @@
   <h:form id="dialogs">
 	 <p:growl id="msgs" showDetail="true"
 					skipDetailIfEqualsSummary="true" />
+			<p:fieldset legend="Captura de Pedidos" 
+            	style="position:fixed; top:0; right:0; width:auto; z-index:1000; text-align:right;">
+    			<h:panelGrid columns="3" style="width:100%" columnClasses="colFecha,colUsuario">
+    				<h:outputText value="Fecha: " />
+			        <h:outputText value="Usuario"/>
+			        
+			        <p:commandButton type="button" icon="pi pi-save" styleClass="mr-2" 
+			       		update=":dialogs msgs">
+			       		<p:ajax event="click" listener="#{capturaPedidosController.save()}" update=":dialogs msgs"/>
+			       	</p:commandButton>
+			       	
+			       	<h:outputText value="#{capturaPedidosController.hoy}">
+			            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+			        </h:outputText>
+			        <p:selectOneMenu id="ejecutivo"
+				                 value="#{capturaPedidosController.ejecutivoSelected.idPersona}"
+				                 editable="false" >
+				         <f:selectItem itemLabel="Selecciona uno" itemValue="0"/>
+				        <f:selectItems value="#{capturaPedidosController.listaEjecutivos}" 
+					                   var="ejecutivo"
+					                   itemValue="#{ejecutivo.idPersona}" 
+					                   itemLabel="#{ejecutivo.userName} - #{ejecutivo.nombre}"/>
+					     <p:ajax event="change" 
+							                listener="#{capturaPedidosController.validaDatosIngresados()}" 
+							              update="ejecutivo"  />                 
+					</p:selectOneMenu>
+    			</h:panelGrid>
+    		</p:fieldset>			
             <p:outputPanel id="manage-product-content" class="ui-fluid">
                 <p:outputPanel >
                     <div class="field">
                     	 <p:accordionPanel multiple="true" widgetVar="multiple" scrollIntoView="center">
-				            <p:tab title="Datos del Cliente">
+				            <p:tab title="Cliente">
 			                    <p:messages/>
                     
-		                    	<h:panelGrid columns="2" columnClasses="label, value"
-		             				style="width:50%; margin:0 auto;">
+		                    	<h:panelGrid columns="3" columnClasses="label, value"
+		             				 style="width:40%; margin-left:0; margin-right:auto;">
 			                        <p:outputLabel for="nombre">Nombre</p:outputLabel>
-			                       <p:inputText id="nombre" value="#{capturaPedidosController.personaPedido.nombre}" />
+			                       <p:inputText id="nombre" value="#{capturaPedidosController.personaPedido.nombre}" >
+			                       		<p:ajax event="blur"
+									            listener="#{capturaPedidosController.resetDatosBusquedaName()}"
+									            update="nombre" />
+			                       </p:inputText>
+			                       <p:commandButton icon="pi pi-pencil" update=":busqueda:manage-product-content"
+					                    oncomplete="PF('manageProductDialog').show()"
+					                    styleClass="edit-button rounded-button ui-button-success" process="@this">
+					                </p:commandButton>
 			                    </h:panelGrid>
 			                    
 			                    <h:panelGrid columns="2" columnClasses="label, value">
 			                    	 <p:outputLabel for="apePat">Apellido Paterno</p:outputLabel>
-			                  		 <p:inputText id="apePat" value="#{capturaPedidosController.personaPedido.apellidoPaterno}"  />
+			                  		 <p:inputText id="apePat" value="#{capturaPedidosController.personaPedido.apellidoPaterno}"  >
+			                  		 	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="apePat" />
+			                  		 </p:inputText>
 			                  		 
 			           				 <p:outputLabel for="apeMat">Apellido Materno</p:outputLabel>
-			                  		 <p:inputText id="apeMat" value="#{capturaPedidosController.personaPedido.apellidoMaterno}"  />
+			                  		 <p:inputText id="apeMat" value="#{capturaPedidosController.personaPedido.apellidoMaterno}"  >
+			                  		 		<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="apeMat" />
+			                  		 </p:inputText>
 			                    	 
 			                        <p:outputLabel for="tele">Telefono</p:outputLabel>
-			                    	<p:inputMask id="tele" value="#{capturaPedidosController.personaPedido.telefono}" mask="(99) 9999-9999" validateMask="true" />
+			                    	<p:inputMask id="tele" value="#{capturaPedidosController.personaPedido.telefono}" mask="(99) 9999-9999" validateMask="true" >
+			                    		<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="tele" />
+			                    	</p:inputMask>
 			
 									<h:outputText value="correo electrónico"/>
 		                   			<p:inputText id="email" 
-							             value="#{pedidosController.personaPedido.correo}" 
+							             value="#{capturaPedidosController.personaPedido.correo}" 
 							             type="email" placeholder="usuario@dominio.com">
-							            
+							            	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="email" />
 							             </p:inputText>
 							             
 									
 			                    </h:panelGrid>
 			                    
 	                        </p:tab>
-	                         <p:tab title="Datos del Cliente">
+	                         <p:tab title="Dirección">
 			                    <p:messages/>
 			                     <h:panelGrid columns="4" columnClasses="label, value"
              						style="width:40%; margin:0 auto;">
@@ -98,21 +148,41 @@
 				                  		 <p:inputText id="Mcpio" value="#{capturaPedidosController.coloniaSeleccioada.nombreMunicipio}" disabled="true"  />
 										
 										 <h:outputText for="calle" value="Calle"/>
-									 	 <p:inputText id="calle" value="#{capturaPedidosController.direccionPedido.calle}"  />
+									 	 <p:inputText id="calle" value="#{capturaPedidosController.direccionPedido.calle}" >
+									 	 	 <p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="calle" />
+									 	 </p:inputText>
 										
 										 <h:outputText for="entreCalle" value="Entre Calles"/>
-									 <p:inputText id="entreCalles" value="#{capturaPedidosController.direccionPedido.entreCalles}"/>
+									 <p:inputText id="entreCalles" value="#{capturaPedidosController.direccionPedido.entreCalles}">
+									 	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="entreCalles" />
+									 </p:inputText>
 									 
 									  <h:outputText for="numExterior" value="# Exterior"/>
-									 <p:inputText id="numExterior" value="#{capturaPedidosController.direccionPedido.numeroExterior}" />
+									 <p:inputText id="numExterior" value="#{capturaPedidosController.direccionPedido.numeroExterior}" >
+									 	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="numExterior" />
+									 </p:inputText>
 									 
 									  <h:outputText for="numInterior" value="# Interior"/>
-									 <p:inputText id="numInterior" value="#{capturaPedidosController.direccionPedido.numeroInterior}" />
+									 <p:inputText id="numInterior" value="#{capturaPedidosController.direccionPedido.numeroInterior}" >
+									 	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="numInterior" />
+									 </p:inputText>
 			                    </h:panelGrid>
 			                    <h:panelGrid columns="2" columnClasses="label, value"
 								             style="width:50%; margin:0 auto;">
 								    <h:outputText value="Referencias"/>
-								    <p:inputTextarea rows="6" style="width:100%;" value="#{capturaPedidosController.direccionPedido.referencias}"/>
+								    <p:inputTextarea rows="6" style="width:100%;" value="#{capturaPedidosController.direccionPedido.referencias}" id="referencias" >
+								    	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="referencias" />
+								    </p:inputTextarea>
 								</h:panelGrid>
                     		</p:tab>
                     		
@@ -169,7 +239,11 @@
 						         	<h:panelGrid columns="2" columnClasses="label, value"
 									             style="width:50%; margin:0 auto;">
 									    <h:outputText value="Observaciones Adicionales"/>
-									    <p:inputTextarea rows="6" style="width:100%;" value="#{capturaPedidosController.formaPagoSelected.observaciones}"/>
+									    <p:inputTextarea rows="6" style="width:100%;" id="obs" value="#{capturaPedidosController.formaPagoSelected.observaciones}">
+									    	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="obs" />
+									    </p:inputTextarea>
 									</h:panelGrid>		    
 					        		</p:splitterPanel>
 					        	 </p:splitter>	
@@ -209,7 +283,11 @@
 			                    <h:panelGrid columns="2" columnClasses="label, value"
 								             style="width:50%; margin:0 auto;">
 								    <h:outputText value="Link de Pago"/>
-								    <p:inputTextarea rows="6" style="width:100%;" value="#{capturaPedidosController.formaPagoSelected.linkPago}" />
+								    <p:inputTextarea rows="6" style="width:100%;" value="#{capturaPedidosController.formaPagoSelected.linkPago}" id="linkPago" >
+								    	<p:ajax event="blur"
+									            listener="#{capturaPedidosController.validaDatosIngresados()}"
+									            update="linkPago" />
+								    </p:inputTextarea>
 								</h:panelGrid>
 			                 </p:tab>   
 	                    </p:accordionPanel>
@@ -257,16 +335,72 @@
                 </p:outputPanel>
             </p:outputPanel>
             
-            <p:commandButton value="Save" icon="pi pi-check"  actionListener="#{capturaPedidosController.save()}" 
-                     process="manage-product-content @this" />
-                <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageProductDialog').hide()"
-                    class="ui-button-secondary" type="button"  />
-                   
-	            
-	                    
 
     </h:form>
 	
+	<h:form id="busqueda">
+	 <p:growl id="msgs" showDetail="true"
+					skipDetailIfEqualsSummary="true" />
+        <p:dialog header="Búsqueda de Cliente"
+          widgetVar="manageProductDialog"
+          modal="true"
+          showEffect="fade"
+          responsive="true"
+          style="width:40%; max-width:40%; margin:0 auto;">
+            <p:outputPanel id="manage-product-content" class="ui-fluid">
+                <p:outputPanel >
+                	<p:outputLabel for="nombreB">Nombre</p:outputLabel>
+                    <p:inputText id="nombreB" value="#{capturaPedidosController.nombreBusqueda}" style="width:30%;"/>
+                    <p:commandButton value="Buscar"
+                             icon="pi pi-save"
+                             action="#{capturaPedidosController.buscaPersonas()}"
+                             update="dt-Marcas" />
+                    
+                   <p:dataTable id="dt-Marcas" var="persona"
+		             value="#{capturaPedidosController.listaBusqueda}"
+		             selection="#{capturaPedidosController.personaBusquedaSelected}"
+		             rowKey="#{persona.nombre}"
+		             selectionMode="single"
+		             paginator="true" rows="10"
+		             scrollable="true" scrollHeight="200"
+		             paginatorPosition="bottom">
+					
+					    <f:facet name="header">
+					        <div class="products-table-header">
+					            <span style="font-weight: bold">Clientes Existentes</span>
+					        </div>
+					    </f:facet>
+					
+					    <p:column headerText="Nombre" style="text-align:center" sortBy="#{persona.nombre}">
+					        <h:outputText value="#{persona.nombre}" />
+					    </p:column>
+					
+					    <p:column headerText="Apellido Paterno" style="text-align:center" sortBy="#{persona.apellidoPaterno}">
+					        <h:outputText value="#{persona.apePat}" />
+					    </p:column>
+					
+					    <p:column headerText="Apellido Materno" style="text-align:center" sortBy="#{persona.apellidoMaterno}">
+					        <h:outputText value="#{persona.apeMat}" />
+					    </p:column>
+					
+					    <p:column headerText="Teléfono" style="text-align:center" sortBy="#{persona.telefono}">
+					        <h:outputText value="#{persona.telefono}" />
+					    </p:column>
+					</p:dataTable>
+					<p:commandButton value="Aceptar"
+                 icon="pi pi-check"
+                 actionListener="#{capturaPedidosController.asignaPersonaSelected()}"
+                 update=":dialogs:manage-product-content"
+                 oncomplete="PF('manageProductDialog').hide()"
+                 styleClass="ui-button-success" />
+
+	                 
+						
+                    
+                </p:outputPanel>
+            </p:outputPanel>  
+        </p:dialog>      
+    </h:form>    
 	
 	
 </h:body>
