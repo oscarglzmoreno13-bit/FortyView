@@ -28,6 +28,7 @@ import org.primefaces.event.UnselectEvent;
 import com.mx.forty.dto.vo.CampaniaVoUi;
 import com.mx.forty.dto.vo.ConfiguracionVentaVoView;
 import com.mx.forty.dto.vo.MarcaVo;
+import com.mx.forty.dto.vo.PedidoViewVo;
 import com.mx.forty.dto.vo.ProductoVoConfigutarion;
 import com.mx.forty.dto.vo.TipoConfiguracionVo;
 import com.mx.forty.util.ConstantesView;
@@ -294,6 +295,8 @@ public class ConfiguracionVentaController implements Serializable {
 		listaSelectedTemp = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<ProductoVoConfigutarion>>() {});
 		PrimeFaces.current().ajax().update("form:messages", ":dialogs:checkboxDT");
 	}
+	
+	 
 	
 	public void onRowSelect(SelectEvent<ProductoVoConfigutarion> event) {
         FacesMessage msg = new FacesMessage("Product Selected", String.valueOf(event.getObject().getIdProducto()));

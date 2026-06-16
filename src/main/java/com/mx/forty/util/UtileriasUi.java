@@ -140,6 +140,7 @@ public class UtileriasUi implements Serializable {
 		map.put("calle", vo.getCalle());
 		map.put("emtreCalles", vo.getEntreCalles());
 		map.put("idColonia", vo.getIdColonia());
+		map.put("nombreColonia", vo.getNombreColonia());
 		map.put("numExterior", vo.getNumeroExterior());
 		map.put("numInterior", vo.getNumeroInterior());
 		map.put("referencias", vo.getReferencias());
@@ -149,6 +150,7 @@ public class UtileriasUi implements Serializable {
 	public static Map<String, Object> converVoToJsonPedidoDetalle(ConfiguracionVentaVoView vo) {
 		 Map<String, Object> map = new HashMap<String, Object>();
 		 map.put("idConfiguracionVenta", vo.getIdConfiguracionVenta());
+		 map.put("nombreConfig", vo.getNombre());
 		 return map;
 	}
 	

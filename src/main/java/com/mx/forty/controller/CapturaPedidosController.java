@@ -279,9 +279,10 @@ public class CapturaPedidosController implements Serializable {
 		cpSeleccionado = new String();
 		buscaCodigosPostales();
 		coloniaSeleccioada = new ColoniaUiVo();
-		buscaCampanias();
+//		buscaCampanias();
+		buscaConfiguracionesByCampania();
 		campaniaSelected = new CampaniaVoUi();
-		listaConfiguraciones = new ArrayList<ConfiguracionVentaVoView>();
+//		listaConfiguraciones = new ArrayList<ConfiguracionVentaVoView>();
 		montoTotal = Double.valueOf(0);
 		buscaTiposFormaPago();
 		tipoFormaPagoSelected = new TipoFormaPagoViewVo();
@@ -308,6 +309,7 @@ public class CapturaPedidosController implements Serializable {
 					}
 				}
 				direccionPedido.setIdColonia(coloniaSeleccioada.getIdColonia());
+				direccionPedido.setNombreColonia(coloniaSeleccioada.getNombre());
 			}
 		}
 	}
@@ -445,7 +447,10 @@ public class CapturaPedidosController implements Serializable {
 			Client client = ClientBuilder.newClient();
 			listaConfiguraciones  = new ArrayList<ConfiguracionVentaVoView>();
 			 WebTarget target = client.target(ConstantesView.hostPROD+"/api/configuraciones/findActivesByCampania")
-	                 .queryParam("idCampania", campaniaSelected.getIdCampania()); // ejemplo idEstado=5
+	                 .queryParam("idCampania", campaniaSelected==null || 
+	                 							(campaniaSelected!=null && campaniaSelected.getIdCampania()==null)?
+		                		 					0:
+		                		 					campaniaSelected.getIdCampania()); // ejemplo idEstado=5
 
 			List<Map<String, Object>> lst = target.request(MediaType.APPLICATION_JSON).get(new GenericType<List<Map<String, Object>>>() {});
 			for (Map<String, Object> map : lst) {

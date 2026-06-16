@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.model.file.UploadedFile;
 
 import com.mx.forty.dto.vo.PedidoViewVo;
@@ -45,7 +46,18 @@ public class BusquedaPedidosController implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private List<PedidoViewVo> listaPedidos;
 	private PedidoViewVo pedidoSelected;
+	private PedidoViewVo pedidoRsp;
 	private UploadedFile file;
+	private String pedidoEcartPay;
+	private Integer idPedidoSelected;
+
+	public String getPedidoEcartPay() {
+		return pedidoEcartPay;
+	}
+
+	public void setPedidoEcartPay(String pedidoEcartPay) {
+		this.pedidoEcartPay = pedidoEcartPay;
+	}
 
 	public UploadedFile getFile() {
 		return file;
@@ -65,21 +77,59 @@ public class BusquedaPedidosController implements Serializable {
 	public void setListaPedidos(List<PedidoViewVo> listaPedidos) {
 		this.listaPedidos = listaPedidos;
 	}
+	
+	public void algo() {
+		if(pedidoSelected == null) {
+			
+		}
+	}
 
 	public PedidoViewVo getPedidoSelected() {
+		if(pedidoSelected==null) {
+			if(pedidoRsp==null) {
+				pedidoSelected = new PedidoViewVo();
+			} else {
+				pedidoSelected = pedidoRsp;
+			}
+			
+		}
 		return pedidoSelected;
+	}
+
+	public Integer getIdPedidoSelected() {
+		return idPedidoSelected;
+	}
+
+	public void setIdPedidoSelected(Integer idPedidoSelected) {
+		this.idPedidoSelected = idPedidoSelected;
 	}
 
 	public void setPedidoSelected(PedidoViewVo pedidoSelected) {
 		this.pedidoSelected = pedidoSelected;
+		pedidoRsp = pedidoSelected==null? new PedidoViewVo():pedidoRsp;
+		pedidoRsp.setIdPedido(pedidoSelected.getIdPedido());
+		idPedidoSelected =  Integer.valueOf(pedidoSelected.getIdPedido());
 	}
 
 	@PostConstruct
 	public void init() {
-		listaPedidos = new ArrayList<PedidoViewVo>();
-		pedidoSelected = new PedidoViewVo();
+//		if(pedidoSelected!=null && pedidoSelected.getIdPedido()!=null) {
+//			
+//		} else {
+//			listaPedidos = new ArrayList<PedidoViewVo>();
+//			pedidoSelected = new PedidoViewVo();
+//			buscaPedidos();
+//		}
+		pedidoSelected = null;
+		pedidoRsp = new PedidoViewVo();
 		buscaPedidos();
+		
 	}
+	
+	public void onRowSelect(SelectEvent<PedidoViewVo> event) {
+        this.pedidoSelected = event.getObject();
+        // Additional backend logic can go here
+    }
 
 	private void buscaPedidos() {
 		// TODO Auto-generated method stub
@@ -102,6 +152,24 @@ public class BusquedaPedidosController implements Serializable {
 		
 	}
 	
+	public void updatePedido() {
+		if(pedidoRsp!=null || idPedidoSelected!=null) {
+			Map<String, Object> json = new HashMap<String, Object>();
+			json.put("idPedido", idPedidoSelected);
+			json.put("numOrden", pedidoEcartPay);
+			Client client = ClientBuilder.newClient();
+	        String url = ConstantesView.hostPROD+"/api/pedidos/updatePedido";
+
+	        // Aquí mandas tu Map o DTO como JSON (ejemplo simplificado)
+	        WebTarget target = client.target(url);
+	        Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.json(json));
+	        response.readEntity(new GenericType<Map<String, Object>>() {});
+	        response.close();
+	        client.close();
+	        buscaPedidos();
+		}
+	}
+	
 	public void procesaPagos(BufferedReader reader) {
 		List<PedidoViewVo> lista = new ArrayList<PedidoViewVo>();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -115,7 +183,8 @@ public class BusquedaPedidosController implements Serializable {
 		    String[] valores = null;
 		    Calendar otra = Calendar.getInstance();
 		    Calendar hoy = Calendar.getInstance();
-//		    hoy.set(Calendar.DAY_OF_MONTH, 5);
+		    hoy.set(Calendar.DAY_OF_MONTH, 5);
+		    hoy.set(Calendar.MONTH, Calendar.MAY);
 		    List<Map<String, Object>> listaMap = new ArrayList<Map<String,Object>>();
 		 try {
 		        String linea;
@@ -138,7 +207,7 @@ public class BusquedaPedidosController implements Serializable {
 								if(string.matches(regex)) {
 									dateCreated = string;
 								}
-							}
+							}System.out.println();
 			  				 if(dateCreated==null) {
 		  						 vo.setFechaCreated(new Date());
 		  					 } else {
@@ -149,11 +218,11 @@ public class BusquedaPedidosController implements Serializable {
 			  				esHoy =  hoy.get(Calendar.YEAR) == otra.get(Calendar.YEAR) &&
 			                         hoy.get(Calendar.MONTH) == otra.get(Calendar.MONTH) &&
 			                         hoy.get(Calendar.DAY_OF_MONTH) == otra.get(Calendar.DAY_OF_MONTH);
-							if(esHoy) {
+//							if(esHoy) {
 								if(vo.getEstatus().equals(ConstantesView.estatus_pagado_ecarPay)) {
 									lista.add(vo);
 									listaMap.add(getMapEnvio(vo));
-								}
+//								}
 							}
 			  			 }
 			  		 } else {

@@ -31,7 +31,10 @@
          </p:toolbar>    
            <p:dataTable id="dt-Marcas" widgetVar="dtMarcas" var="pedido" value="#{consultaPedidos.listaPedidos}"
             reflow="true" styleClass="products-table" 
-            rowKey="#{pedido.idPedido}" paginator="true" rows="10" selectionRowMode="add" paginatorPosition="bottom">
+            rowKey="#{pedido.idPedido}" paginator="true" rows="10" selectionMode="single" paginatorPosition="bottom"
+            selection="#{consultaPedidos.pedidoSelected}">
+
+            
             <f:facet name="header">
                 <div class="products-table-header">
                     <span style="font-weight: bold">Pedidos</span>
@@ -65,13 +68,14 @@
                 <h:outputText value="#{pedido.estatus}" />
             </p:column>
              <p:column exportable="false" style="text-align:center" ariaHeaderText="Actions" headerText="Acciones">
-	            <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-product-content :form:dt-Marcas"
-	                 oncomplete="PF('manageProductDialog').show()"
-	                 styleClass="edit-button rounded-button ui-button-success" process="@this">
-	                 
-	                 <f:setPropertyActionListener value="pedido"
-	                                              target="#{consultaPedidos.pedidoSelected}"/>
-	             </p:commandButton>
+	             <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-product-content"
+	                    oncomplete="PF('manageProductDialog').show()"
+	                    styleClass="edit-button rounded-button ui-button-success" 
+	                    actionListener="#{consultaPedidos.algo()}">
+	                     
+	                    <f:setPropertyActionListener value="#{pedido}" target="#{consultaPedidos.pedidoSelected}" />
+	                    <p:resetInput target=":dialogs:manage-product-content" />
+	                </p:commandButton> 
 	              <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
 	                              process="@this" styleClass="ui-button-danger" 
 	                              oncomplete="PF('deleteProductDialog').show()">
@@ -84,6 +88,24 @@
                       mode="simple" skinSimple="true" auto="true"
                       process="@this" update="form"
                       listener="#{consultaPedidos.handleFileUpload}" />
+                      
+                      
+            <p:dialog id="myDialog" 
+		              widgetVar="itemDialog" 
+		              header="Item Details" 
+		              modal="true" 
+		              closable="true" 
+		              dynamic="true">
+		        <h:panelGroup id="dialogContent">
+		            <h:panelGrid columns="2" rendered="#{not empty myBean.selectedItem}">
+		                <h:outputLabel value="ID:" />
+		                <h:outputText value="#{consultaPedidos.pedidoSelected.idPedido}" />
+		                
+		                <h:outputLabel value="Name:" />
+		                <p:inputText id="nombre" value="#{consultaPedidos.pedidoEcartPay}" required="true" />
+		            </h:panelGrid>
+		        </h:panelGroup>
+		    </p:dialog>           
           
     </h:form>
     
@@ -101,15 +123,21 @@
             <p:outputPanel id="manage-product-content" class="ui-fluid">
                 <p:outputPanel >
                     <div class="field">
+                    	<p:outputLabel for="num"># Pedido</p:outputLabel>
+                        <p:inputText id="num" value="#{consultaPedidos.idPedidoSelected}" required="true" />
                         <p:outputLabel for="nombre"># Orden EcarPay</p:outputLabel>
-                        <p:inputText id="nombre" value="#{consultaPedidos.pedidoSelected.pedidoEcartpay}" required="true" />
+                        <p:inputText id="nombre" value="#{consultaPedidos.pedidoEcartPay}" required="true" />
                     </div>
                 </p:outputPanel>
             </p:outputPanel>
 
             <f:facet name="footer">
-                <p:commandButton value="Save" icon="pi pi-check"  actionListener="#{campaniaController.saveCampania()}" 
-                    update="manage-product-content" process="manage-product-content @this" />
+                <p:commandButton value="Aceptar"
+                 icon="pi pi-check"
+                 actionListener="#{consultaPedidos.updatePedido()}"
+                 update=":form"
+                 oncomplete="PF('manageProductDialog').hide()"
+                 styleClass="ui-button-success" />
                 <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageProductDialog').hide()"
                     class="ui-button-secondary" type="button"  />
             </f:facet>

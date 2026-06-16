@@ -7,6 +7,13 @@ public class DireccionPedidoViewVo {
 	private String entreCalles;
 	private String referencias;
 	private Integer idColonia;
+	private String nombreColonia;
+	public String getNombreColonia() {
+		return nombreColonia;
+	}
+	public void setNombreColonia(String nombreColonia) {
+		this.nombreColonia = nombreColonia;
+	}
 	private String numeroExterior;
 	private String numeroInterior;
 	public String getNumeroInterior() {
