@@ -9,8 +9,8 @@ public class ConstantesView implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public static String hostPROD = "http://3.129.16.75:8080/demo";
-//	public static String hostPROD = "http://localhost:8080/demo";
+//	public static String hostPROD = "http://3.129.16.75:8080/demo";
+	public static String hostPROD = "http://localhost:8080/demo";
 	public static Integer ESTATUS_GRAL_ACTIVO = 1;
 	public static final int columna_status=0;
 	public static final int columna_amount=1;

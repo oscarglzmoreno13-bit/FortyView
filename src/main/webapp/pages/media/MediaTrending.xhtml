@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+      
+      <h:outputScript name="locales/locale-de.js" library="primefaces" />
+<h:outputScript name="locales/locale-es.js" library="primefaces" />
+      
+      <style>
+    .ui-filter-column .ui-column-customfilter .custom-filter {
+        width: 100%;
+        box-sizing: border-box;
+    }
+</style>
+      
+      
+<h:head>
+    <title>Tendencias en Redes Sociales</title>
+</h:head>
+<h:body>
+ 
+ <h:form id="form">    
+         
+         <p:growl id="msgs" showDetail="true"
+					skipDetailIfEqualsSummary="true" />
+         
+        <p:toolbar>
+            
+         </p:toolbar>  
+			 <p:commandButton value="Search Youtube" icon="pi pi-check"  actionListener="#{mediaTrending.getYouTubeTrending()}" 
+               update=":form:tblVideo"      />  
+            <p:dataTable value="#{mediaTrending.listaVideos}" var="video" id="tblVideo">
+			    <p:column headerText="Título">
+			        #{video.snippet.title}
+			    </p:column>
+			    <p:column headerText="Canal">
+			        #{video.snippet.channelTitle}
+			    </p:column>
+			    <p:column headerText="Vistas">
+			        #{video.statistics.viewCount}
+			    </p:column>
+			    <p:column headerText="Miniatura">
+			        <h:graphicImage value="#{video.snippet.thumbnails.default.url}" width="120" height="90"/>
+			    </p:column>
+			</p:dataTable>
+			
+         <p:commandButton value="Search Google" icon="pi pi-check"  actionListener="#{mediaTrending.getGoogleTrends()}" 
+             update=":form:tblGoogle"   />
+             
+             <p:dataTable value="#{mediaTrending.listaTrendingSearch}" var="trend" rows="10" paginator="true" id="tblGoogle">
+		        <p:column headerText="Tendencia">
+		            #{trend.query}
+		        </p:column>
+		        <p:column headerText="Volumen de búsqueda">
+		            #{trend.search_volume}
+		        </p:column>
+		        <p:column headerText="Incremento %">
+		            #{trend.increase_percentage}
+		        </p:column>
+		        <p:column headerText="Categoría">
+		            <ui:repeat value="#{trend.categories}" var="cat">
+		                <h:outputText value="#{cat.name}"/><br/>
+		            </ui:repeat>
+		        </p:column>
+		        <p:column headerText="Relacionado">
+		            <ui:repeat value="#{trend.trendBreakdown}" var="related">
+		                <h:outputText value="#{related}"/><br/>
+		            </ui:repeat>
+		        </p:column>
+		    </p:dataTable>
+                
+          
+    </h:form>
+    
+    <h:form id="dialogs">
+        <p:dialog header="Datos de la Marca" showEffect="fade" modal="true" widgetVar="manageProductDialog"
+            responsive="true">
+            <p:outputPanel id="manage-product-content" class="ui-fluid">
+                <p:outputPanel >
+                    <div class="field">
+                    </div>
+                    <div class="field">
+                    </div>
+                </p:outputPanel>
+            </p:outputPanel>
+
+        </p:dialog>
+   </h:form>     
+     
+</h:body>
+</html>
